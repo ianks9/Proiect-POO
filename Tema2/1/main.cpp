@@ -35,7 +35,7 @@ void Stiva::afisare()
 }
 int main()
 {
-    Stiva a(3);
+    Stiva a(0);
     a.adaug(1);
     a.adaug(2);
     a.adaug(3);
