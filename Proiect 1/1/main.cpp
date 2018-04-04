@@ -7,7 +7,7 @@ class pereche
 {
     double coeficient;
     unsigned exponent;
-
+    friend class polinom;
 
 public:
     pereche(){};
@@ -39,7 +39,7 @@ std::istream& operator >>(std::istream &in, pereche &p)
 class polinom
 {
 
-    friend class pereche;
+
     pereche p;
     polinom *next;
 public:
@@ -526,85 +526,146 @@ polinom& polinom::operator[](const int n)
 }
 int main()
 {
-    ifstream fin;
-    fin.open("pol.text");
+
     polinom p1,p2,s,zero(0,0);
-    int i=1,punct;
+    int i=1,punct,ok=0;
     while(i)
     {
-        cout<<"1)citire fisier\n2)afisare polinom (pol 1)\n3)calcularea intr-un punct (pol 1)\n4)suma\n5)diferenta\n6)produsul\n7)catul\n8)restul\n9)afisarea unui element\n10)impartire cu 0\n";
+        cout<<"1)citire fisier\n2)citire tastatura\n3)afisare polinom (pol 1)\n4)calcularea intr-un punct (pol 1)\n5)suma\n6)diferenta\n7)produsul\n8)catul\n9)restul\n10)afisarea unui element\n11)impartire cu 0\n";
         cin>>i;
         switch(i)
         {
         case 1:
             {
-                fin>>p1;
-                fin>>p2;
+                ifstream fin;
+                fin.open("pol.text");
+                if(fin.is_open())
+                {
+                    fin>>p1;
+                    fin>>p2;
+                    ok=1;
+                    fin.close();
+                }
+                else
+                    cout<<"eroare la deschiderea fisierului";
                 break;
             }
         case 2:
             {
-               cout<<p1<<"\n";
-               break;
+               cout<<"introdu cat elemente are polinomul 1 si elementele acestuia";
+               cin>>p1;
+               cout<<"introdu cat elemente are polinomul 2 si elementele acestuia";
+               cin>>p2;
+               ok=1;
             }
         case 3:
             {
+               if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+               cout<<p1<<"\n";
+               }
+               break;
+            }
+        case 4:
+            {
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
                 cout<<"punctul:";
                 cin>>punct;
                 p1.calcpunct(punct);
                 cout<<"\n";
-                break;
-            }
-        case 4:
-            {
-                s=p1+p2;
-                s=s.mergepol();
-                s=*(s.szero());
-                cout<<s<<"\n";
+               }
                 break;
             }
         case 5:
             {
-                s=p1-p2;
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                s=p1+p2;
                 s=s.mergepol();
                 s=*(s.szero());
                 cout<<s<<"\n";
+                }
                 break;
             }
         case 6:
             {
-                s=p1*p2;
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                s=p1-p2;
                 s=s.mergepol();
                 s=*(s.szero());
                 cout<<s<<"\n";
+                }
                 break;
             }
         case 7:
             {
-                s=p1/p2;
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                s=p1*p2;
                 s=s.mergepol();
                 s=*(s.szero());
                 cout<<s<<"\n";
+               }
                 break;
             }
         case 8:
             {
-                s=p1%p2;
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                s=p1/p2;
                 s=s.mergepol();
                 s=*(s.szero());
                 cout<<s<<"\n";
+               }
                 break;
             }
         case 9:
             {
-                cout<<"al catelea element:";
-                cin>>punct;
-                cout<<p1[punct].getp()<<"\n";
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                s=p1%p2;
+                s=s.mergepol();
+                s=*(s.szero());
+                cout<<s<<"\n";
+               }
                 break;
             }
         case 10:
             {
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
+                cout<<"al catelea element:";
+                cin>>punct;
+               }
+                cout<<p1[punct].getp()<<"\n";
+                break;
+            }
+        case 11:
+            {
+                if(ok==0)
+                cout<<"NU sa citit niciun polinom";
+               else
+               {
                 s=p1/zero;
+               }
                 break;
             }
         }
