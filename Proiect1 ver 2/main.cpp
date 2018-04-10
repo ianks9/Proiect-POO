@@ -58,8 +58,8 @@ std::istream& operator >>(std::istream &in, pereche &p)
 }
 class polinom
 {
-
-public: pereche *p;
+pereche *p;
+public:
     ~polinom()
     {
         if(p!=NULL)
