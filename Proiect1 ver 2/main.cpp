@@ -31,14 +31,16 @@ public:pereche *next;
     void setc(double c)
     {
         if(isalpha(c))
-        cout<<"Fail";
-        else coeficient=c;
+            cout<<"Fail set c";
+        else
+            coeficient=c;
     };
     void sete(unsigned e)
     {
         if(isalpha(e))
-            cout<<"Fail";
-            else exponent=e;
+            cout<<"Fail sete";
+        else
+            exponent=e;
     };
 };
 std::ostream& operator<< (std::ostream &out, const pereche &p)
@@ -72,25 +74,49 @@ public: pereche *p;
     {
         p=new pereche(c,e);
     };
-    polinom getnext();
+    polinom(const polinom &pol)
+    {
+        pereche *e,*c,*d;
+        int ok=0;
+        d=pol.p;
+        while(d!=NULL)
+        {
+
+            e=new pereche(d->getc(),d->gete());
+            if(ok==0)
+            {
+                ok=1;
+                c=e;
+                p=c;
+            }
+            else
+            {
+                c->next=e;
+                c=c->next;
+                c->next=NULL;
+            }
+            d=d->next;
+        }
+    };
     pereche* getp(){return p;};
     void calcpunct(int n);
     void ordonare();
     void ordonareinversa();
     void mergepol();        //scapa de perechi cu acelasi exponent
     void szero();       //scapa de perechi cu coeficientul 0
-    polinom & operator[](const int n);
+    pereche & operator[](const int n);
     friend std::ostream& operator<< (std::ostream &out, const polinom &p);
     friend std::istream& operator>> (std::istream &in, polinom &p);
-    friend polinom operator+(const polinom p1,const polinom p2);
-    friend polinom operator-(const polinom p1,const polinom p2);
-    friend polinom operator*(const polinom p1,const polinom p2);
-    friend polinom operator/(const polinom p1,const polinom p2);
-    friend polinom operator%(const polinom p1,const polinom p2);
+    friend polinom operator+(const polinom &p1,const polinom &p2);
+    friend polinom operator-(const polinom &p1,const polinom &p2);
+    friend polinom operator*(const polinom &p1,const polinom &p2);
+    friend polinom operator/(const polinom &p1,const polinom &p2);
+    friend polinom operator%(const polinom &p1,const polinom &p2);
 };
 void polinom ::szero()
 {
-    pereche *r,*q;
+    pereche *r,*q,*zero;
+    zero=new pereche(0,0);
     int ok=0;
     q=p;
     r=p->next;
@@ -124,10 +150,9 @@ void polinom ::szero()
         r=r->next;
 
     }
-    //cout<<"R";
     if(p->coeficient==0)
         if(p->next==NULL)
-            p=0;
+            p=zero;
         else
         {
             p=p->next;
@@ -276,7 +301,7 @@ void polinom:: mergepol()
             break;
     }
 }
-polinom operator+(const polinom p1,const polinom p2)
+polinom operator+(const polinom &p1,const polinom &p2)
 {
     polinom s;
     pereche *r1,*r2,*c,*r,*rc;
@@ -361,7 +386,7 @@ polinom operator+(const polinom p1,const polinom p2)
     //cout<<p1<<endl<<p2<<endl;
     return s;
 }
-polinom operator-(const polinom p1,const polinom p2)
+polinom operator-(const polinom &p1,const polinom &p2)
 {
     polinom s;
     pereche *r1,*r2,*c,*r,*rc;
@@ -444,7 +469,7 @@ polinom operator-(const polinom p1,const polinom p2)
     s.szero();
     return s;
 }
-polinom operator*(const polinom p1,const polinom p2)
+polinom operator*(const polinom &p1,const polinom &p2)
 {
     polinom s;
     pereche *r1,*r2,*r,*c,*rc;
@@ -477,53 +502,43 @@ polinom operator*(const polinom p1,const polinom p2)
     s.szero();
     return s;
 }
-polinom operator/(const polinom p1,const polinom p2)
+polinom operator/(const polinom &p1,const polinom &p2)
 {
-    polinom catul,restul,test;
-    pereche *dempartitul,*impartitorul,*element,*inceputul,*ultimulele,*ult,*elescazut,*parcurgere,*copie1,*copie2;
+    polinom catul,restul(p1),test(p2);
+    pereche *dempartitul,*impartitorul,*element,*inceputul,*ultimulele,*ult,*elescazut,*parcurgere;
     int i=0,j=0;
     unsigned exp;
-    int co;
-    //crearea unuei copii ale lui p1
-    dempartitul=p1.p;
-    while(dempartitul!=NULL)
-    {
-        element=new pereche(dempartitul->getc(),dempartitul->gete());
-        if(j==0)
-        {
-            j=1;
-            copie1=element;
-            copie2=copie1;
-        }
-        else
-        {
-            copie1->next=element;
-            copie1=copie1->next;
-            copie1->next=NULL;
-        }
-        dempartitul=dempartitul->next;
-    }
-    dempartitul=copie2;
-
+    int co,grad=0;
     //test daca p2.p e 0
 
-    impartitorul=p2.p;
-    test.p=impartitorul;
     test.szero();
-    if(test.p==NULL)
+    if(test.p->next==NULL && test.p->getc()==0 && test.p->gete()==0)
     {
-        cout<<"EROR";
+        cout<<"EROR NU SE POATE IMPARTI CU 0"<<"\n";
+        return 0;
     }
-
+    //ordornarea inversa
     test.ordonareinversa();
-    restul.p=copie2;
     restul.ordonareinversa();
-
+    //impartirea
+    dempartitul=restul.p;
+    impartitorul=test.p;
     while(dempartitul->gete()>=impartitorul->gete())
     {
+
         exp=dempartitul->gete()-impartitorul->gete();
         co=dempartitul->getc()/impartitorul->getc();
+        if(exp==0)
+        {
+            if(grad==0)
+            {
+                grad=1;
+            }
+            else
+                break;
+        }
         //construire cat
+
         element=new pereche(co,exp);
         if(i==0)
         {
@@ -538,6 +553,7 @@ polinom operator/(const polinom p1,const polinom p2)
         }
 
         //construire rest
+
         ult=dempartitul;
         while(ult->next!=NULL)
             ult=ult->next;
@@ -554,109 +570,32 @@ polinom operator/(const polinom p1,const polinom p2)
         restul.mergepol();
         restul.szero();
         dempartitul=restul.p;
+
     }
     catul.p=inceputul;
     catul.ordonare();
     return catul;
 }
-polinom operator%(const polinom p1,const polinom p2)
+polinom operator%(const polinom &p1,const polinom &p2)
 {
-    polinom catul,restul,test;
-    pereche *dempartitul,*impartitorul,*element,*inceputul,*ultimulele,*ult,*elescazut,*parcurgere,*copie1,*copie2;
-    int i=0,j=0;
-    unsigned exp;
-    int co;
-    //crearea unuei copii ale lui p1
-    dempartitul=p1.p;
-    while(dempartitul!=NULL)
-    {
-        element=new pereche(dempartitul->getc(),dempartitul->gete());
-        if(j==0)
-        {
-            j=1;
-            copie1=element;
-            copie2=copie1;
-        }
-        else
-        {
-            copie1->next=element;
-            copie1=copie1->next;
-            copie1->next=NULL;
-        }
-        dempartitul=dempartitul->next;
-    }
-    dempartitul=copie2;
-
-    //test daca p2.p e 0
-
-    impartitorul=p2.p;
-    test.p=impartitorul;
-    test.szero();
-    if(test.p==NULL)
-    {
-        cout<<"EROR";
-    }
-
-    test.ordonareinversa();
-    restul.p=copie2;
-    restul.ordonareinversa();
-
-    while(dempartitul->gete()>=impartitorul->gete())
-    {
-        exp=dempartitul->gete()-impartitorul->gete();
-        co=dempartitul->getc()/impartitorul->getc();
-        //construire cat
-        element=new pereche(co,exp);
-        if(i==0)
-        {
-            i=1;
-            ultimulele=element;
-            inceputul=ultimulele;
-        }
-        else
-        {
-            ultimulele->next=element;
-            ultimulele=ultimulele->next;
-        }
-
-        //construire rest
-        ult=dempartitul;
-        while(ult->next!=NULL)
-            ult=ult->next;
-        parcurgere=impartitorul;
-        while(parcurgere!=NULL)
-        {
-            elescazut=new pereche(-1*(parcurgere->getc()*co),parcurgere->gete()+exp);
-            ult->next=elescazut;
-            ult=ult->next;
-            parcurgere=parcurgere->next;
-        }
-
-        restul.ordonareinversa();
-        restul.mergepol();
-        restul.szero();
-        dempartitul=restul.p;
-    }
-    catul.p=inceputul;
-    catul.ordonare();
+    polinom r1(p1/p2);
+    polinom r2(r1*p2);
+    polinom restul(p1-r2);
     return restul;
 }
-polinom& polinom::operator[](const int n)
+pereche& polinom::operator[](const int n)
 {
-   // if(n==0)
-    //     return p;
-   // else
-    //{
-    //polinom *p1,*pc1;
-    //p1=new polinom(p);
-    //p1->next=next;
-    //pc1=p1;
-    //int i;
-    //for(i=0;i<n;i++)
-     //   p1=p1->next;
-    //delete pc1;
-    //return *(p1);
-    //}
+    if(n==0)
+         return *(p);
+    else
+    {
+    pereche *p1;
+    p1=p;
+    int i;
+    for(i=0;i<n;i++)
+        p1=p1->next;
+    return *(p1);
+    }
 }
     int main()
 {
@@ -680,6 +619,8 @@ polinom& polinom::operator[](const int n)
                     fin>>p2;
                     ok=1;
                     fin.close();
+                    p1.ordonare();
+                    p2.ordonare();
                 }
                 else
                     cout<<"eroare la deschiderea fisierului";
@@ -692,6 +633,8 @@ polinom& polinom::operator[](const int n)
                cout<<"introdu cate elemente are polinomul 2 si apoi elementele acestuia";
                cin>>p2;
                ok=1;
+               p1.ordonare();
+               p2.ordonare();
             }
         case 3:
             {
@@ -699,7 +642,7 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
-               cout<<p1<<"\n";
+               cout<<p1<<"\n"<<p2<<"\n";
                }
                break;
             }
@@ -722,9 +665,9 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
-                cout<<p1<<endl<<p2<<endl;
-                cout<<p1+p2<<"\n";
-                cout<<p1<<endl<<p2<<endl;
+                polinom s(p1+p2);
+                cout<<s<<"\n";
+
                 }
                 break;
             }
@@ -734,7 +677,9 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
+
                 cout<<p1-p2<<"\n";
+
                 }
                 break;
             }
@@ -744,7 +689,9 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
+
                 cout<<p1*p2<<"\n";
+
                }
                 break;
             }
@@ -754,7 +701,9 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
+
                 cout<<p1/p2<<"\n";
+
                }
                 break;
             }
@@ -764,7 +713,9 @@ polinom& polinom::operator[](const int n)
                 cout<<"NU sa citit niciun polinom";
                else
                {
+
                 cout<<p1%p2<<"\n";
+
                }
                 break;
             }
@@ -777,7 +728,7 @@ polinom& polinom::operator[](const int n)
                 cout<<"al catelea element:";
                 cin>>punct;
                }
-                cout<<p1[punct].getp()<<"\n";
+                cout<<p1[punct]<<"\n";
                 break;
             }
         case 11:
@@ -792,7 +743,7 @@ polinom& polinom::operator[](const int n)
             }
         default:
             {
-                cout<<"pune alt ceva";
+                cout<<"nu meriti sa folosesti programul!!!";
                 break;
             }
         }
