@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1523382392 source:c:\users\iancu\desktop\cod\poo\proiecte poo\tema4\test\main.cpp
+	<iostream>
+	<fstream>
+
