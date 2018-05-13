@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1526225058 source:c:\users\iancu\desktop\cod\poo\proiectepoo\proiectul2\main.cpp
+	<iostream>
+	<string.h>
+	<vector>
+
