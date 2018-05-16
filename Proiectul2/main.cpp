@@ -8,11 +8,11 @@ struct data
 };
 class Plata
 {
-    public:
+    protected:
     unsigned suma;
     struct data dat;
     Plata *next;
-
+    public:
         Plata(){};
         Plata(unsigned s,struct data d)
         {
@@ -20,76 +20,93 @@ class Plata
             dat=d;
             next=NULL;
         }
+        Plata* getnext()
+        {
+            return next;
+        }
+        struct data getd()
+        {
+            return dat;
+        };
+        unsigned getsuma()
+        {
+            return suma;
+        }
         Plata(const Plata &p)
         {
             suma=p.suma;
             dat=p.dat;
             next=NULL;
         }
-        Plata operator=(const Plata &p)
+        Plata operator=(Plata &p)
         {
             *(this)=p;
         }
-        void setnext(Plata *p)
+        void setnext( Plata *p)
         {
             next=p;
         }
-        void citire();
+        friend void citire(Plata &p);
         virtual void afisare(){
             cout<<"Cash\nSuma: "<<suma<<endl;
             cout<<"Data: "<<dat.zi<<" "<<dat.luna<<" "<<dat.an<<endl;
 
         };
 };
-void Plata::citire ()
+void citire (Plata &p)
 {
+
     int i;
     cout<<"Suma: ";
     cin>>i;
     if(i<0)
     {
         cout<<"Suma nu poate fi Negativa, suma va fi setata ca 10"<<endl;
-        suma=10;
+        p.suma=10;
     }
     else
-        suma=i;
+        p.suma=i;
     cout<<"Ziua: ";
     cin>>i;
     if(i<0 || i>32)
     {
         cout<<"Zi invalida , ziua va fi setata ca 10"<<endl;
-        dat.zi=10;
+        p.dat.zi=10;
     }
     else
-        dat.zi=i;
+        p.dat.zi=i;
     cout<<"Luna: ";
     cin>>i;
     if(i<0 || i>12)
     {
         cout<<"luna invalida, luna va fi setata ca 10"<<endl;
-        dat.luna=10;
+        p.dat.luna=10;
     }
     else
-        dat.luna=i;
+        p.dat.luna=i;
     cout<<"Anul: ";
     cin>>i;
     if(i<1900 || i>2018)
     {
         cout<<"An Invalid, anul va fi setata ca 2018"<<endl;
-        dat.an=2018;
+        p.dat.an=2018;
     }
     else
-        dat.an=i;
-    next=NULL;
+        p.dat.an=i;
+    p.next=NULL;
 }
 
 class Card: public Plata
 {
-    public:
+    protected:
     char *nume;
     vector<int> nrcard;
-
+    public:
        Card() :Plata(){};
+       char *getnu()
+       {
+           return nume;
+       }
        Card(unsigned s,struct data d,char* n,vector<int> nr) :Plata(s,d)
        {
             nume=new char(strlen(n)+1);
@@ -101,17 +118,33 @@ class Card: public Plata
            delete nume;
            nrcard.clear();
        }
-       void citirecard();
+       void cc(Plata p)
+       {
+           this->dat=p.getd();
+           this->suma=p.getsuma();
+           this->next=p.getnext();
+       }
+       friend void citirecard();
        void afisare();
+       void citirenume()
+       {
+           char c[20];
+            cout<<"Numele: ";
+            cin>>c;
+            this->nume=new char(strlen(c)+1);
+            strcpy(this->nume,c);
+       }
+       void adaugainvector(int a)
+       {
+           this->nrcard.push_back(a);
+       }
 };
-void Card::citirecard()
+void citirecard(Card ca)
 {
-    this->citire();
-    char c[20];
-    cout<<"Numele: ";
-    cin>>c;
-    nume=new char(strlen(c)+1);
-    strcpy(nume,c);
+    Plata p;
+    citire(p);
+    ca.cc(p);
+    ca.citirenume();
     int i,a;
     cout<<"Cardul: ";
     for(i=1;i<=12;i++)
@@ -120,10 +153,10 @@ void Card::citirecard()
         if(a<0 || a>9)
         {
             cout<<"variabila invalida ,se va pune 5"<<endl;
-            nrcard.push_back(5);
+            ca.adaugainvector(5);
         }
         else
-            nrcard.push_back(a);
+            ca.adaugainvector(a);
 
     }
 }
@@ -140,10 +173,10 @@ void Card::citirecard()
 template <class T>
 class Gestiune
 {
-    public:
+    protected:
     int nrplati;
     Plata *comenzi;
-
+    public:
         Gestiune()
         {
             nrplati=0;
@@ -159,11 +192,11 @@ class Gestiune
             Plata *p;
             if(comenzi!=NULL)
             {
-                while(comenzi->next!=NULL)
+                while(comenzi->getnext()!=NULL)
                 {
 
                     p=comenzi;
-                    comenzi=comenzi->next;
+                    comenzi=comenzi->getnext();
                     delete p;
                 }
                 delete comenzi;
@@ -174,11 +207,11 @@ class Gestiune
 
             if(nrplati!=0)
             {
-                Plata *q=new Plata(p),*t;
+                Plata *t,*q=new Plata(p);
                 nrplati++;
                 t=comenzi;
-                while(t->next!=NULL)
-                    t=t->next;
+                while(t->getnext()!=NULL)
+                    t=t->getnext();
                 t->setnext(q);
             }
             else
@@ -193,7 +226,7 @@ class Gestiune
         {
               cout<<"Nr de plati: ";
                 int n,i,c;
-                Plata pla;
+                Plata pla,*p;
                 Card card;
                 cin>>n;
                 for(i=0;i<n;i++)
@@ -203,18 +236,22 @@ class Gestiune
                     if(c==1)
                     {
 
-                        card.citirecard();
-                        *(this)+=card;
+                        citirecard(card);
+
+                        p=dynamic_cast<Plata*>(&card);
+                        *(this)+=*p;
                     }
                     else
                     {
-
-                        pla.citire();
+                        if(c!=2)
+                            cout<<"input gresit , se va citi cash";
+                        citire(pla);
                         *(this)+=pla;
                     }
 
                 }
         };
+
         void afisare()
         {
             cout<<"Nr de palti: "<<nrplati<<endl;
@@ -222,11 +259,8 @@ class Gestiune
             p=comenzi;
             for(int i=0;i<nrplati;i++)
             {
-
                     p->afisare();
-
-
-                p=p->next;
+                    p=p->getnext();
             }
         }
 };
@@ -252,16 +286,16 @@ class Gestiune<char*>{
             for(int i=0;i<nrclienti;i++)
                 delete clienti[i];
         };
-        Gestiune& operator+=(const Card &p)
+        Gestiune& operator+=(Card &p)
         {
             Card *q;
             int ok=0;
-            q=(Card*)&p;
+            q=&p;
             if(nrclienti!=0)
             {
                for(int i=0;i<nrclienti;i++)
                {
-                   if(!(strcmp(clienti[i],q->nume)))
+                   if(!(strcmp(clienti[i],q->getnu())))
                    {
                         ok=1;
                         break;
@@ -269,17 +303,20 @@ class Gestiune<char*>{
                }
                if(ok==0)
                {
-                    clienti[nrclienti]=new char(strlen(q->nume)+1);
-                    strcpy(clienti[nrclienti],q->nume);
+                    clienti[nrclienti]=new char(strlen(q->getnu())+1);
+                    strcpy(clienti[nrclienti],q->getnu());
                     nrclienti++;
                }
             }
             else
             {
-                clienti[0]=new char(strlen(q->nume)+1);
-                strcpy(clienti[0],q->nume);
+                //------------------------EROR----------------------------------------------
+                clienti[0]=new char(strlen(q->getnu())+1);
+                strcpy(clienti[0],q->getnu());
+                //------------------------EROR----------------------------------------------
                 nrclienti=1;
             }
+
             return *this;
         };
         void citireg()
@@ -296,12 +333,17 @@ class Gestiune<char*>{
                     if(c==1)
                     {
 
-                        card.citirecard();
+                        citirecard(card);
                         *(this)+=card;
                     }
-                    else
+                    else{
+                    if(c==2)
                     {
-                        pla.citire();
+                        citire(pla);
+                    }
+                    else
+                        cout<<"input prost se va citi cash<<endl";
+                        citire(pla);
                     }
 
                 }
